@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './user/user.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -18,12 +19,15 @@ import configuration from './config/configuration';
           username: configService.get('postgres.user'),
           password: configService.get('postgres.pass'),
           database: configService.get('postgres.db'),
+          synchronize: configService.get('typeorm.synchronize'),
+          logging: configService.get('typeorm.logging'),
+          logger: configService.get('typeorm.logger'),
           autoLoadEntities: true,
-          synchronize: false,
         };
       },
       inject: [ConfigService],
     }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
