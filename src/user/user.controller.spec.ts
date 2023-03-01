@@ -13,6 +13,7 @@ describe('UserController', () => {
           useValue: {
             findAll: jest.fn(() => []),
             findOne: jest.fn(),
+            remove: jest.fn(),
           },
         },
       ],
