@@ -13,6 +13,7 @@ import { User } from './entities/user.entity';
 import {
   EMAIL_REQUIRED,
   USER_ALREADY_CREATED,
+  USER_NOT_FOUND,
   USER_NOT_FOUND_IN_GITHUB,
 } from '../utils/errors';
 
@@ -66,6 +67,12 @@ export class UserService {
   }
 
   async remove(id: number): Promise<void> {
+    const user = await this.findOneById(id);
+
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND);
+    }
+
     await this.usersRepository.delete(id);
   }
 }

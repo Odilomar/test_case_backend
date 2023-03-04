@@ -3,5 +3,7 @@ export const EMAIL_REQUIRED =
 
 export const USER_ALREADY_CREATED = 'Your user is already created';
 
+export const USER_NOT_FOUND = 'This user was not found!';
+
 export const USER_NOT_FOUND_IN_GITHUB =
   'User not found in the github api. Change your username and retry it!';

@@ -14,8 +14,10 @@ import {
 import {
   EMAIL_REQUIRED,
   USER_ALREADY_CREATED,
+  USER_NOT_FOUND,
   USER_NOT_FOUND_IN_GITHUB,
 } from '../utils/errors';
+import { Repository } from 'typeorm';
 
 const data = {
   avatar_url: 'https://github.com/images/error/octocat_happy.gif',
@@ -31,6 +33,7 @@ const expected = {
 describe('UserService', () => {
   let service: UserService;
   let githubService: GithubService;
+  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +60,7 @@ describe('UserService', () => {
 
     githubService = module.get<GithubService>(GithubService);
     service = module.get<UserService>(UserService);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
 
     jest
       .spyOn(githubService, 'getUserByUsername')
@@ -155,6 +159,26 @@ describe('UserService', () => {
             new InternalServerErrorException(),
           ));
       });
+    });
+  });
+
+  describe('when removing a user', () => {
+    describe('when user is removed', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(service, 'findOneById')
+          .mockImplementation(async () => expected as unknown as User);
+        return service.remove(123);
+      });
+      it('calls the delete method', () =>
+        expect(userRepository.delete).toBeCalledWith(123));
+    });
+
+    describe('when throws an error', () => {
+      it('should throw not found error', () =>
+        expect(service.remove(123)).rejects.toThrowError(
+          new NotFoundException(USER_NOT_FOUND),
+        ));
     });
   });
 });
