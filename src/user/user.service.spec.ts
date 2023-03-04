@@ -11,7 +11,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { NotFoundError } from 'rxjs';
+import {
+  EMAIL_REQUIRED,
+  USER_ALREADY_CREATED,
+  USER_NOT_FOUND_IN_GITHUB,
+} from '../utils/errors';
 
 const data = {
   avatar_url: 'https://github.com/images/error/octocat_happy.gif',
@@ -87,9 +91,7 @@ describe('UserService', () => {
 
       it('should throw an error when there is no email', () =>
         expect(service.create({ username: 'test' })).rejects.toThrowError(
-          new BadRequestException(
-            "Your email address is not in your github profile page and it's not in the request. Try to create your user again with the email address in the body request!",
-          ),
+          new BadRequestException(EMAIL_REQUIRED),
         ));
     });
 
@@ -103,7 +105,7 @@ describe('UserService', () => {
 
         it('should throw the correct error', () =>
           expect(service.create({ username: 'test' })).rejects.toThrowError(
-            new ConflictException('Your user is already created'),
+            new ConflictException(USER_ALREADY_CREATED),
           ));
 
         describe('when using the email in the body', () => {
@@ -121,7 +123,7 @@ describe('UserService', () => {
             expect(
               service.create({ username: 'test', email: 'teste@gmail.com' }),
             ).rejects.toThrowError(
-              new ConflictException('Your user is already created'),
+              new ConflictException(USER_ALREADY_CREATED),
             ));
         });
       });
@@ -136,9 +138,7 @@ describe('UserService', () => {
 
         it('should throw the correct error', () =>
           expect(service.create({ username: 'test' })).rejects.toThrowError(
-            new NotFoundException(
-              'User not found in the github api. Change your username and retry it!',
-            ),
+            new NotFoundException(USER_NOT_FOUND_IN_GITHUB),
           ));
       });
       describe('when throws internal server error', () => {

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,11 @@ import { GithubService } from '../services/github/github.service';
 import { FindManyOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
+import {
+  EMAIL_REQUIRED,
+  USER_ALREADY_CREATED,
+  USER_NOT_FOUND_IN_GITHUB,
+} from '../utils/errors';
 
 @Injectable()
 export class UserService {
@@ -24,15 +30,13 @@ export class UserService {
       const { data: profile } = response;
 
       if (!profile.email && !email) {
-        throw new BadRequestException(
-          "Your email address is not in your github profile page and it's not in the request. Try to create your user again with the email address in the body request!",
-        );
+        throw new BadRequestException(EMAIL_REQUIRED);
       }
 
       const user = await this.findOneByEmail(profile.email || email);
 
       if (!!user) {
-        throw new ConflictException('Your user is already created');
+        throw new ConflictException(USER_ALREADY_CREATED);
       }
 
       return this.usersRepository.save({
@@ -41,10 +45,8 @@ export class UserService {
         email: profile.email || email,
       });
     } catch (error) {
-      if (error.status === 404) {
-        throw new NotFoundException(
-          'User not found in the github api. Change your username and retry it!',
-        );
+      if (error.status === HttpStatus.NOT_FOUND) {
+        throw new NotFoundException(USER_NOT_FOUND_IN_GITHUB);
       }
 
       throw error;
