@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,8 +7,17 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Post,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 
@@ -15,6 +25,21 @@ import { UserService } from './user.service';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ description: 'Created Succesfully' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({ description: 'Conflicted Request' })
+  @ApiNotFoundResponse({ description: 'Not Found Error' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  async createUser(@Body() body: CreateUserDto): Promise<User> {
+    try {
+      return this.userService.create(body);
+    } catch (err) {
+      throw new HttpException(err, err.statusCode);
+    }
+  }
 
   @Get('/')
   async getUsers(): Promise<User[]> {
@@ -28,7 +53,7 @@ export class UserController {
   @Get('/:id')
   async getUserById(@Param('id') id: number): Promise<User> {
     try {
-      return this.userService.findOne(id);
+      return this.userService.findOneById(id);
     } catch (err) {
       throw new HttpException(err, err.statusCode);
     }
