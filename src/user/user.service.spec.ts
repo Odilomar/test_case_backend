@@ -181,4 +181,46 @@ describe('UserService', () => {
         ));
     });
   });
+
+  describe('when finding a user', () => {
+    describe('when using findOneBy method', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(userRepository, 'findOneBy')
+          .mockImplementation(async () => expected as unknown as User);
+      });
+
+      describe('when finding a user by id', () => {
+        it('should returns the user', () =>
+          expect(service.findOneById(expected.id)).resolves.toBe(expected));
+      });
+
+      describe('when finding a user by email', () => {
+        it('should returns the user', () =>
+          expect(service.findOneByEmail(expected.email)).resolves.toBe(
+            expected,
+          ));
+      });
+    });
+
+    describe('when using find method', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(userRepository, 'find')
+          .mockImplementation(async () => [expected as unknown as User]);
+      });
+
+      describe('when using no filters', () => {
+        it('returs the correct data', () =>
+          expect(service.findAll()).resolves.toStrictEqual([expected]));
+      });
+
+      describe('when filtering by name', () => {
+        it('returs the correct data', () =>
+          expect(
+            service.findAll({ where: { name: 'monalisa octocat' } }),
+          ).resolves.toStrictEqual([expected]));
+      });
+    });
+  });
 });
