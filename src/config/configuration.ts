@@ -25,6 +25,9 @@ export default (): Configuration => {
       logger: process.env.TYPEORM_LOGGER,
       entities: process.env.TYPEORM_ENTITIES,
     },
+    github: {
+      auth: process.env.GITHUB_API_TOKEN,
+    },
   };
 };
 
@@ -48,5 +51,8 @@ type Configuration = {
     logging: boolean;
     logger: string;
     entities: string;
+  };
+  github: {
+    auth: string;
   };
 };
