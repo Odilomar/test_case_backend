@@ -16,6 +16,7 @@ import {
   USER_NOT_FOUND,
   USER_NOT_FOUND_IN_GITHUB,
 } from '../utils/errors';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -64,6 +65,16 @@ export class UserService {
 
   findOneByEmail(email: string): Promise<User> {
     return this.usersRepository.findOneBy({ email });
+  }
+
+  async update({ id, ...info }: UpdateUserDto): Promise<User> {
+    const user = await this.findOneById(id);
+
+    if (!user) {
+      throw new NotFoundException(USER_NOT_FOUND);
+    }
+
+    return this.usersRepository.save({ ...user, ...info });
   }
 
   async remove(id: number): Promise<void> {

@@ -20,7 +20,7 @@ import {
 import { Repository } from 'typeorm';
 
 const data = {
-  avatar_url: 'https://github.com/images/error/octocat_happy.gif',
+  avatar: 'https://github.com/images/error/octocat_happy.gif',
   name: 'monalisa octocat',
   email: 'octocat@github.com',
 };
@@ -174,9 +174,28 @@ describe('UserService', () => {
         expect(userRepository.delete).toBeCalledWith(123));
     });
 
-    describe('when throws an error', () => {
+    describe('when no user is founded', () => {
       it('should throw not found error', () =>
         expect(service.remove(123)).rejects.toThrowError(
+          new NotFoundException(USER_NOT_FOUND),
+        ));
+    });
+  });
+
+  describe('when updating a user', () => {
+    describe('when user is updated', () => {
+      beforeEach(() => {
+        jest
+          .spyOn(service, 'findOneById')
+          .mockImplementation(async () => expected as unknown as User);
+      });
+      it('returns the correct data', () =>
+        expect(service.update(expected)).resolves.toStrictEqual(expected));
+    });
+
+    describe('when no user is founded', () => {
+      it('should throw not found error', () =>
+        expect(service.update(expected)).rejects.toThrowError(
           new NotFoundException(USER_NOT_FOUND),
         ));
     });

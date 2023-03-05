@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -18,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 
@@ -36,6 +38,22 @@ export class UserController {
   async createUser(@Body() body: CreateUserDto): Promise<User> {
     try {
       return this.userService.create(body);
+    } catch (err) {
+      throw new HttpException(err, err.statusCode);
+    }
+  }
+
+  @Put('/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiCreatedResponse({ description: 'Created Succesfully' })
+  @ApiNotFoundResponse({ description: 'Not Found Error' })
+  @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
+  async updateUser(
+    @Param('id') id: number,
+    @Body() body: UpdateUserDto,
+  ): Promise<User> {
+    try {
+      return this.userService.update({ id, ...body });
     } catch (err) {
       throw new HttpException(err, err.statusCode);
     }
