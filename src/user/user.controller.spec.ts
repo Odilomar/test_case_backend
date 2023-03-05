@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker';
 import {
   BadRequestException,
   ConflictException,
-  HttpException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
