@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   Post,
@@ -36,11 +35,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'Not Found Error' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
   async createUser(@Body() body: CreateUserDto): Promise<User> {
-    try {
-      return this.userService.create(body);
-    } catch (err) {
-      throw new HttpException(err, err.statusCode);
-    }
+    return this.userService.create(body);
   }
 
   @Put('/:id')
@@ -52,38 +47,22 @@ export class UserController {
     @Param('id') id: number,
     @Body() body: UpdateUserDto,
   ): Promise<User> {
-    try {
-      return this.userService.update({ id, ...body });
-    } catch (err) {
-      throw new HttpException(err, err.statusCode);
-    }
+    return this.userService.update({ id, ...body });
   }
 
   @Get('/')
   async getUsers(): Promise<User[]> {
-    try {
-      return this.userService.findAll();
-    } catch (err) {
-      throw new HttpException(err, err.statusCode);
-    }
+    return this.userService.findAll();
   }
 
   @Get('/:id')
   async getUserById(@Param('id') id: number): Promise<User> {
-    try {
-      return this.userService.findOneById(id);
-    } catch (err) {
-      throw new HttpException(err, err.statusCode);
-    }
+    return this.userService.findOneById(id);
   }
 
   @Delete('/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUserById(@Param('id') id: number): Promise<void> {
-    try {
-      await this.userService.remove(id);
-    } catch (err) {
-      throw new HttpException(err, err.statusCode);
-    }
+    await this.userService.remove(id);
   }
 }
