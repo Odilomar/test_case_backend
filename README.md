@@ -9,6 +9,8 @@ Docker lastest (version used to develop this project: Docker version 23.0.1, bui
 ## Run
 To install the packages for the project, run ``` npm run install ```
 
+Remember to update the .env file. The application already have a pre-structured .env.example file with all required envs
+
 To create the postgres db, run ``` npm run db:create ```
 
 To run the application, ``` run npm start ``` or ``` npm run start:dev ```
@@ -16,7 +18,7 @@ To run the application, ``` run npm start ``` or ``` npm run start:dev ```
 To see the swagger ui with the endpoints, just go to the http://localhost:3000/api/
 
 ## Tests
-To run the unit test, run ``` npm run test ```
+To run unit tests, run ``` npm run test ```
 
 To run coverage, run ``` npm run test:cov ```
 
