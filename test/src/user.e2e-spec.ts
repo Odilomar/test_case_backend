@@ -1,56 +1,95 @@
-import { faker } from '@faker-js/faker';
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as request from 'supertest';
-import { AppModule } from '../../src/app.module';
-import { UserService } from '../../src/user/user.service';
+import configuration from '../../src/config/configuration';
+import { ClearDatabaseService } from '../../src/services/clear-database/clear-database.service';
+import { GithubService } from '../../src/services/github/github.service';
+import { ServicesModule } from '../../src/services/services.module';
+import { UserModule } from '../../src/user/user.module';
 
 const data = {
-  avatar: 'https://github.com/images/error/octocat_happy.gif',
-  name: 'monalisa octocat',
-  email: 'octocat@github.com',
+  name: 'Deleted user',
+  avatar_url: 'https://avatars.githubusercontent.com/u/10137?v=4',
+  email: 'ghost@gmail.com',
+  username: 'ghost',
 };
 
 const expected = {
   ...data,
-  id: faker.datatype.number(),
+  avatar: data.avatar_url,
+  avatar_url: undefined,
+  id: 1,
 };
 
 describe('Users', () => {
   let app: INestApplication;
-  let userService: UserService;
+  let clearDatabaseService: ClearDatabaseService;
 
   const makeRequest = () => request(app.getHttpServer());
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
+        TypeOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => {
+            return {
+              type: 'postgres',
+              host: configService.get('postgres.test.host'),
+              port: configService.get('postgres.test.port'),
+              username: configService.get('postgres.test.user'),
+              password: configService.get('postgres.test.pass'),
+              database: configService.get('postgres.test.db'),
+              synchronize: configService.get('typeorm.synchronize'),
+              logging: configService.get('typeorm.logging'),
+              logger: configService.get('typeorm.logger'),
+              autoLoadEntities: true,
+            };
+          },
+          inject: [ConfigService],
+        }),
+        UserModule,
+        ServicesModule,
+      ],
     })
-      .overrideProvider(UserService)
+      .overrideProvider(GithubService)
       .useValue({
-        create: jest.fn(() => expected),
-        update: jest.fn(() => expected),
-        findAll: jest.fn(() => [expected]),
-        findOneById: jest.fn(() => expected),
-        findOneByEmail: jest.fn(() => expected),
-        remove: jest.fn(),
+        getUserByUsername: jest.fn(() => ({ data })),
       })
       .compile();
 
     app = module.createNestApplication();
     await app.init();
 
-    userService = module.get<UserService>(UserService);
+    clearDatabaseService =
+      module.get<ClearDatabaseService>(ClearDatabaseService);
+    await clearDatabaseService.cleanDatabase();
   });
 
   afterAll(async () => {
+    await clearDatabaseService.cleanDatabase();
     await app.close();
+  });
+
+  describe('/POST users', () => {
+    let createUser;
+
+    beforeAll(() => {
+      createUser = makeRequest().post('/users').send(expected);
+    });
+
+    it('returns the correct status code', () =>
+      createUser.expect(HttpStatus.CREATED));
+    it('returns the correct data', () => createUser.expect(expected));
   });
 
   describe('/GET users', () => {
     let getUsers;
 
-    beforeEach(() => {
+    beforeAll(() => {
       getUsers = makeRequest().get('/users');
     });
 
@@ -61,30 +100,19 @@ describe('Users', () => {
   describe('/GET users/:id', () => {
     let getUser;
 
-    beforeEach(() => {
-      getUser = makeRequest().get('/users/123');
+    beforeAll(() => {
+      getUser = makeRequest().get(`/users/${expected.id}`);
     });
 
     it('returns the correct status code', () => getUser.expect(HttpStatus.OK));
     it('returns the correct data', () => getUser.expect(expected));
   });
 
-  describe('/DELETE users/:id', () => {
-    let deleteUser;
-
-    beforeEach(() => {
-      deleteUser = makeRequest().delete('/users/123');
-    });
-
-    it('returns the correct status code', () =>
-      deleteUser.expect(HttpStatus.NO_CONTENT));
-  });
-
   describe('/PUT users/:id', () => {
     let updateUser;
 
-    beforeEach(() => {
-      updateUser = makeRequest().put('/users/123').send(expected);
+    beforeAll(async () => {
+      updateUser = makeRequest().put(`/users/${expected.id}`).send(expected);
     });
 
     it('returns the correct status code', () =>
@@ -92,15 +120,14 @@ describe('Users', () => {
     it('returns the correct data', () => updateUser.expect(expected));
   });
 
-  describe('/POST users', () => {
-    let createUser;
+  describe('/DELETE users/:id', () => {
+    let deleteUser;
 
-    beforeEach(() => {
-      createUser = makeRequest().post('/users').send(expected);
+    beforeAll(() => {
+      deleteUser = makeRequest().delete(`/users/${expected.id}`);
     });
 
     it('returns the correct status code', () =>
-      createUser.expect(HttpStatus.CREATED));
-    it('returns the correct data', () => createUser.expect(expected));
+      deleteUser.expect(HttpStatus.NO_CONTENT));
   });
 });

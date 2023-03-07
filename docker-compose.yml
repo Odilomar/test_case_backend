@@ -16,3 +16,18 @@ services:
       POSTGRES_DB: "testcasedb"
     ports:
       - 5434:5432
+  dbtest:
+    image: postgres
+    container_name: testcasedbtest
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres"]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+      POSTGRES_DB: "testcasedbtest"
+    ports:
+      - 5435:5432

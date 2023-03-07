@@ -15,11 +15,11 @@ import configuration from './config/configuration';
       useFactory: async (configService: ConfigService) => {
         return {
           type: 'postgres',
-          host: configService.get('postgres.host'),
-          port: configService.get('postgres.port'),
-          username: configService.get('postgres.user'),
-          password: configService.get('postgres.pass'),
-          database: configService.get('postgres.db'),
+          host: configService.get('postgres.dev.host'),
+          port: configService.get('postgres.dev.port'),
+          username: configService.get('postgres.dev.user'),
+          password: configService.get('postgres.dev.pass'),
+          database: configService.get('postgres.dev.db'),
           synchronize: configService.get('typeorm.synchronize'),
           logging: configService.get('typeorm.logging'),
           logger: configService.get('typeorm.logger'),

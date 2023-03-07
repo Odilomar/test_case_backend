@@ -9,11 +9,20 @@ export default (): Configuration => {
 
   return {
     postgres: {
-      host: env.DB_HOST,
-      port: parseInt(env.DB_PORT),
-      user: env.DB_USER,
-      pass: env.DB_PASS,
-      db: env.DB_NAME,
+      dev: {
+        host: env.DB_HOST,
+        port: parseInt(env.DB_PORT),
+        user: env.DB_USER,
+        pass: env.DB_PASS,
+        db: env.DB_NAME,
+      },
+      test: {
+        host: env.TEST_DB_HOST,
+        port: parseInt(env.TEST_DB_PORT),
+        user: env.TEST_DB_USER,
+        pass: env.TEST_DB_PASS,
+        db: env.TEST_DB_NAME,
+      },
     },
     environment: {
       nodeEnv: env.NODE_ENV,
@@ -36,11 +45,20 @@ export default (): Configuration => {
  */
 type Configuration = {
   postgres: {
-    host: string;
-    port: number;
-    user: string;
-    pass: string;
-    db: string;
+    dev: {
+      host: string;
+      port: number;
+      user: string;
+      pass: string;
+      db: string;
+    };
+    test: {
+      host: string;
+      port: number;
+      user: string;
+      pass: string;
+      db: string;
+    };
   };
   environment: {
     nodeEnv: string;

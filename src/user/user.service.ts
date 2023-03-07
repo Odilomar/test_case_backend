@@ -68,7 +68,12 @@ export class UserService {
   }
 
   async update({ id, ...info }: UpdateUserDto): Promise<User> {
+    console.log('on update');
     const user = await this.findOneById(id);
+
+    const users = await this.findAll();
+
+    console.log({ user, users });
 
     if (!user) {
       throw new NotFoundException(USER_NOT_FOUND);
