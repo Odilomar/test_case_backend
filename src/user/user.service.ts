@@ -71,10 +71,6 @@ export class UserService {
     console.log('on update');
     const user = await this.findOneById(id);
 
-    const users = await this.findAll();
-
-    console.log({ user, users });
-
     if (!user) {
       throw new NotFoundException(USER_NOT_FOUND);
     }
